@@ -1,0 +1,5 @@
+{
+  "PLA": {"temperature": 34, "drying_time": 60},
+  "ABS": {"temperature": 69, "drying_time": 120},
+  "PETG": {"temperature": 55, "drying_time": 90}
+}
