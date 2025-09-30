@@ -12,6 +12,41 @@ class FilamentDryerGUI(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle('Filament Dryer Control System')
+        self.setWindowState(self.windowState() | Qt.WindowState.WindowFullScreen)
+
+        # Create tab widget for navigation
+        self.tabs = QTabWidget()
+        self.tabs.setFont(QFont('Segoe UI', 18, QFont.Weight.Bold))
+        self.tabs.setStyleSheet('''
+            QTabBar::tab {
+                height: 60px;
+                font-size: 20pt;
+                min-width: 180px;
+                max-width: 180px;
+                border-radius: 16px;
+                background: #353941;
+                color: #f0f0f0;
+            }
+            QTabBar::tab:selected {
+                background: #0078d7;
+                color: #fff;
+                border: 2px solid #ff9800;
+            }
+            QTabBar { min-height: 60px; }
+        ''')
+
+        # Create pages before adding tabs or connecting signals
+        self.main_page = MainPage()
+        self.settings_page = SettingsPage()
+        self.debugging_page = DebuggingPage(main_page=self.main_page, settings_page=self.settings_page)
+
+        # Add tabs
+        self.tabs.addTab(self.main_page, "Main")
+        self.tabs.addTab(self.settings_page, "Settings")
+        self.tabs.addTab(self.debugging_page, "Debug")
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle('Filament Dryer Control System')
         # Set window to full screen for 7" touchscreen
         self.setWindowState(self.windowState() | Qt.WindowState.WindowFullScreen)
 
@@ -27,9 +62,6 @@ class FilamentDryerGUI(QMainWindow):
                 border-radius: 16px;
                 background: #353941;
                 color: #f0f0f0;
-                margin: 4px;
-                padding: 8px 24px;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.15);
             }
             QTabBar::tab:selected {
                 background: #0078d7;
@@ -39,7 +71,7 @@ class FilamentDryerGUI(QMainWindow):
             QTabBar { min-height: 60px; }
         ''')
 
-        # Create pages
+        # Create pages before adding tabs or connecting signals
         self.main_page = MainPage()
         self.settings_page = SettingsPage()
         self.debugging_page = DebuggingPage(main_page=self.main_page, settings_page=self.settings_page)
@@ -49,7 +81,7 @@ class FilamentDryerGUI(QMainWindow):
         self.tabs.addTab(self.settings_page, "Settings")
         self.tabs.addTab(self.debugging_page, "Debug")
 
-        # Status bar (move to top)
+        # Status bar (now includes time and LED)
         self.status = QStatusBar()
         self.status.setStyleSheet('''
             QStatusBar {
@@ -61,37 +93,25 @@ class FilamentDryerGUI(QMainWindow):
                 min-height: 48px;
             }
         ''')
-
-
-        self.status_label = QLabel("Temperature: 0°C | Humidity: --% | Status: Idle | Preset: None | Time Remaining: --:-- | Time: --:--:--")
+        self.status_label = QLabel("Temperature: 0°C | Humidity: --% | Status: Idle | Preset: None | Time Remaining: --:--")
         self.status_label.setFont(QFont('Segoe UI', 20, QFont.Weight.Bold))
         self.status_label.setMinimumHeight(48)
         self.status.addWidget(self.status_label)
-
-
-        # Top bar widgets (current time and heater LED)
-        self.top_bar = QWidget()
-        top_bar_layout = QHBoxLayout()
-        top_bar_layout.setContentsMargins(0, 0, 12, 0)
-        top_bar_layout.addStretch()
-        # Current time label
+        self.status.addPermanentWidget(QWidget(), 1)  # stretch
         self.time_label = QLabel()
         self.time_label.setFont(QFont('Segoe UI', 18, QFont.Weight.Bold))
         self.time_label.setStyleSheet('color: #ff9800;')
-        top_bar_layout.addWidget(self.time_label)
-        # Heater LED
+        self.status.addPermanentWidget(self.time_label)
         self.led_label = QLabel()
         self.led_label.setFixedSize(32, 32)
         self.led_label.setStyleSheet('border-radius: 16px; background: #353941; border: 2px solid #232629;')
-        top_bar_layout.addWidget(self.led_label)
-        self.top_bar.setLayout(top_bar_layout)
+        self.status.addPermanentWidget(self.led_label)
 
-        # Add top bar to layout
+        # Layout
         central_widget = QWidget()
         central_layout = QVBoxLayout()
         central_layout.setSpacing(0)
         central_layout.setContentsMargins(0, 0, 0, 0)
-        central_layout.addWidget(self.top_bar)
         central_layout.addWidget(self.status)
         central_layout.addWidget(self.tabs)
         central_widget.setLayout(central_layout)
@@ -117,7 +137,9 @@ class FilamentDryerGUI(QMainWindow):
         countdown = self.main_page.countdown_label.text() if hasattr(self.main_page, 'countdown_label') else '--:--'
         humidity = self.main_page.humidity_label.text() if hasattr(self.main_page, 'humidity_label') else '--'
         now = datetime.now().strftime('%H:%M:%S')
-        self.status_label.setText(f"{temp} | {humidity} | {preset_info} | Time Remaining: {countdown} | Time: {now}")
+        # Remove duplicated 'Time Remaining:' label, only show value
+        self.status_label.setText(f"{temp} | {humidity} | {preset_info} | {countdown}")
+        self.time_label.setText(now)
 
     def update_top_bar(self):
         # Update LED color/brightness
