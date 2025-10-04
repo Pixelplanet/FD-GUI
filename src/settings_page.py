@@ -1,10 +1,29 @@
 import sys
+import platform
+import subprocess
 import json
 from PyQt6.QtWidgets import (QApplication, QWidget, QVBoxLayout, QLabel, 
                              QPushButton, QGridLayout, QDialog, QDialogButtonBox,
                              QSlider, QLineEdit, QHBoxLayout, QMessageBox, QGroupBox)
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QFont
+
+class OSKLineEdit(QLineEdit):
+    def __init__(self, *args, osk_mode=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.osk_mode = osk_mode  # None or 'numpad'
+
+    def focusInEvent(self, event):
+        super().focusInEvent(event)
+        # Only launch OSK on Raspberry Pi
+        if platform.system() == 'Linux' and 'raspberrypi' in platform.uname().nodename.lower():
+            cmd = ['matchbox-keyboard']
+            if self.osk_mode == 'numpad':
+                cmd += ['--layout', 'numpad']
+            try:
+                subprocess.Popen(cmd)
+            except Exception as e:
+                print(f'Failed to launch OSK: {e}')
 
 class SettingsPage(QWidget):
     presets_changed = pyqtSignal(dict)
@@ -13,9 +32,9 @@ class SettingsPage(QWidget):
         dialog.setWindowTitle('Add New Preset')
         dialog.setModal(True)
         layout = QVBoxLayout()
-        name_edit = QLineEdit()
-        temp_edit = QLineEdit()
-        time_edit = QLineEdit()
+        name_edit = OSKLineEdit()
+        temp_edit = OSKLineEdit(osk_mode='numpad')
+        time_edit = OSKLineEdit(osk_mode='numpad')
         name_edit.setPlaceholderText('Preset Name')
         temp_edit.setPlaceholderText('Temperature (°C)')
         time_edit.setPlaceholderText('Drying Time (min)')
@@ -57,9 +76,9 @@ class SettingsPage(QWidget):
         dialog.setModal(True)
         layout = QVBoxLayout()
 
-        name_edit = QLineEdit(preset)
-        temp_edit = QLineEdit(str(data.get('temperature', '')))
-        time_edit = QLineEdit(str(data.get('drying_time', '')))
+        name_edit = OSKLineEdit(preset)
+        temp_edit = OSKLineEdit(str(data.get('temperature', '')), osk_mode='numpad')
+        time_edit = OSKLineEdit(str(data.get('drying_time', '')), osk_mode='numpad')
         name_edit.setPlaceholderText('Preset Name')
         temp_edit.setPlaceholderText('Temperature (°C)')
         time_edit.setPlaceholderText('Drying Time (min)')
@@ -170,18 +189,21 @@ class SettingsPage(QWidget):
         pid_desc.setWordWrap(True)
         pid_layout.addWidget(pid_desc)
 
-        self.pid_p_edit = QLineEdit()
-        self.pid_i_edit = QLineEdit()
-        self.pid_d_edit = QLineEdit()
-        self.pid_p_edit.setPlaceholderText('P (Proportional)')
-        self.pid_i_edit.setPlaceholderText('I (Integral)')
-        self.pid_d_edit.setPlaceholderText('D (Derivative)')
+        pid_p_edit = OSKLineEdit(osk_mode='numpad')
+        pid_i_edit = OSKLineEdit(osk_mode='numpad')
+        pid_d_edit = OSKLineEdit(osk_mode='numpad')
+        pid_p_edit.setPlaceholderText('P (Proportional)')
+        pid_i_edit.setPlaceholderText('I (Integral)')
+        pid_d_edit.setPlaceholderText('D (Derivative)')
         pid_layout.addWidget(QLabel('P:'))
-        pid_layout.addWidget(self.pid_p_edit)
+        pid_layout.addWidget(pid_p_edit)
         pid_layout.addWidget(QLabel('I:'))
-        pid_layout.addWidget(self.pid_i_edit)
+        pid_layout.addWidget(pid_i_edit)
         pid_layout.addWidget(QLabel('D:'))
-        pid_layout.addWidget(self.pid_d_edit)
+        pid_layout.addWidget(pid_d_edit)
+        self.pid_p_edit = pid_p_edit
+        self.pid_i_edit = pid_i_edit
+        self.pid_d_edit = pid_d_edit
 
         pid_save_btn = QPushButton('Save PID Values')
         pid_save_btn.setFont(QFont('Segoe UI', 18, QFont.Weight.Bold))

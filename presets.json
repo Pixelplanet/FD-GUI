@@ -1,1 +1,1 @@
-{"PLA": {"temperature": 66, "drying_time": 60}, "ABS": {"temperature": 80, "drying_time": 60}, "PETG": {"temperature": 60, "drying_time": 60}, "PC": {"temperature": 80, "drying_time": 60}}
+{"PLA": {"temperature": 66, "drying_time": 60}, "ABS": {"temperature": 80, "drying_time": 60}, "PETG": {"temperature": 60, "drying_time": 60}, "PC": {"temperature": 80, "drying_time": 60}, "TPU": {"temperature": 80, "drying_time": 55}}
