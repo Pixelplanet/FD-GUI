@@ -6,6 +6,7 @@ from PyQt6.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout,
                              QLabel, QPushButton, QSlider, QGroupBox, 
                              QGridLayout, QFrame, QLineEdit)
 from PyQt6.QtCore import Qt, pyqtSignal, QTimer
+from src.pin_definitions import HEATER_PIN, FAN_PIN, TEMP_SENSOR_PIN, HUMIDITY_SENSOR_PIN, BUZZER_PIN, LED_PIN, BUTTON_PIN, PINS
 from PyQt6.QtGui import QFont
 
 # GPIO mock and detection
@@ -94,6 +95,15 @@ class TestingPage(QWidget):
             self.temp_label.setFont(QFont('Arial', 16))
             temp_layout.addWidget(self.temp_label)
             temp_group.setLayout(temp_layout)
+                    # Pin assignments from pin_definitions
+                    self.heater_pin = HEATER_PIN
+                    self.fan_pin = FAN_PIN
+                    self.temp_sensor_pin = TEMP_SENSOR_PIN
+                    self.humidity_sensor_pin = HUMIDITY_SENSOR_PIN
+                    self.buzzer_pin = BUZZER_PIN
+                    self.led_pin = LED_PIN
+                    self.button_pin = BUTTON_PIN
+                    self.pins = PINS
             layout.addWidget(temp_group)
 
             # Target temperature input

@@ -6,6 +6,7 @@ from PyQt6.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout, QL
 from PyQt6.QtCore import Qt, pyqtSignal, QTimer
 from PyQt6.QtGui import QFont
 import pyqtgraph as pg
+from src.pin_definitions import HEATER_PIN, FAN_PIN, TEMP_SENSOR_PIN, HUMIDITY_SENSOR_PIN, BUZZER_PIN, LED_PIN, BUTTON_PIN, PINS
 
 class MainPage(QWidget):
     # Add heater and PWM state
@@ -56,6 +57,7 @@ class MainPage(QWidget):
     switch_to_settings = pyqtSignal()
     
     def __init__(self):
+        print("MainPage constructor called")
         super().__init__()
         self.selected_preset = "PLA"
         self.target_temperature = 34
@@ -80,6 +82,8 @@ class MainPage(QWidget):
         self.simulate_timer.start(1000)
         self.countdown_timer = QTimer()
         self.countdown_timer.timeout.connect(self.update_countdown)
+
+
     def init_ui(self):
         layout = QVBoxLayout()
 
@@ -138,8 +142,6 @@ class MainPage(QWidget):
         self.countdown_label.setFont(QFont('Segoe UI', 18, QFont.Weight.Bold))
         layout.addWidget(self.countdown_label)
 
-    # Removed target temperature display (only show preset info)
-
         # Control buttons in a rounded card
         control_card = QGroupBox('Controls')
         control_card.setStyleSheet('QGroupBox { border-radius: 16px; background: #353941; margin-top: 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.10); } QGroupBox:title { font-size: 20px; font-weight: bold; color: #ff9800; }')
@@ -185,8 +187,6 @@ class MainPage(QWidget):
         self.remaining_time = self.preset_time * 60
         self.update_preset_info()
         self.update_countdown_label()
-    # Removed call to update_target_temp_label()
-    # Removed update_target_temp_label method
 
     def change_preset(self, preset):
         self.update_selected_preset(preset)
@@ -205,6 +205,7 @@ class MainPage(QWidget):
             self.humidity_history.pop(0)
             self.time_history.pop(0)
         self.update_graph()
+
     def update_preset_info(self):
         preset = self.selected_preset
         temp = self.presets[preset]["temperature"]
@@ -227,4 +228,13 @@ class MainPage(QWidget):
             self.update_countdown_label()
             if self.remaining_time == 0:
                 self.stop_dryer()
+
+if __name__ == "__main__":
+    print("Main entry point reached")
+    import sys
+    from PyQt6.QtWidgets import QApplication
+    app = QApplication(sys.argv)
+    window = MainPage()
+    window.show()
+    sys.exit(app.exec())
 
