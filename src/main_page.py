@@ -1,10 +1,10 @@
 import sys
 import random
 import datetime
-from PyQt6.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, 
+from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, 
                              QPushButton, QSlider, QGridLayout, QGroupBox, QComboBox)
-from PyQt6.QtCore import Qt, pyqtSignal, QTimer
-from PyQt6.QtGui import QFont
+from PyQt5.QtCore import Qt, pyqtSignal, QTimer
+from PyQt5.QtGui import QFont
 import pyqtgraph as pg
 from src.pin_definitions import HEATER_PIN, FAN_PIN, TEMP_SENSOR_PIN, HUMIDITY_SENSOR_PIN, BUZZER_PIN, LED_PIN, BUTTON_PIN, PINS
 
@@ -232,7 +232,7 @@ class MainPage(QWidget):
 if __name__ == "__main__":
     print("Main entry point reached")
     import sys
-    from PyQt6.QtWidgets import QApplication
+    from PyQt5.QtWidgets import QApplication
     app = QApplication(sys.argv)
     window = MainPage()
     window.show()

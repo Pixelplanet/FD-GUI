@@ -1,9 +1,9 @@
 import sys
 import json
-from PyQt6.QtWidgets import (QApplication, QMainWindow, QTabWidget, QWidget, QVBoxLayout, QLabel, QStatusBar, QMessageBox, QHBoxLayout)
-from PyQt6.QtCore import Qt, QTimer
-from PyQt6.QtGui import QFont
-from PyQt6.QtCore import Qt
+from PyQt5.QtWidgets import (QApplication, QMainWindow, QTabWidget, QWidget, QVBoxLayout, QLabel, QStatusBar, QMessageBox, QHBoxLayout)
+from PyQt5.QtCore import Qt, QTimer
+from PyQt5.QtGui import QFont
+from PyQt5.QtCore import Qt
 from src.main_page import MainPage
 from src.settings_page import SettingsPage
 from src.debugging_page import DebuggingPage

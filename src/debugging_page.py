@@ -1,6 +1,6 @@
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QTextEdit, QPushButton
-from PyQt6.QtCore import QTimer
-from PyQt6.QtGui import QFont
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QTextEdit, QPushButton
+from PyQt5.QtCore import QTimer
+from PyQt5.QtGui import QFont
 import traceback
 
 class DebuggingPage(QWidget):

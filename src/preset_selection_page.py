@@ -1,10 +1,10 @@
 import sys
 import json
-from PyQt6.QtWidgets import (QApplication, QWidget, QVBoxLayout, QLabel, 
+from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QLabel, 
                              QPushButton, QGridLayout, QDialog, QDialogButtonBox,
                              QSlider, QHBoxLayout, QMessageBox)
-from PyQt6.QtCore import Qt, pyqtSignal
-from PyQt6.QtGui import QFont
+from PyQt5.QtCore import Qt, pyqtSignal
+from PyQt5.QtGui import QFont
 
 class PresetSelectionPage(QWidget):
     switch_to_main = pyqtSignal(str)
