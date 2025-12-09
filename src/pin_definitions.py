@@ -6,9 +6,10 @@ HEATER_PIN = 18
 FAN_PIN = 17
 TEMP_SENSOR_PIN = 4
 HUMIDITY_SENSOR_PIN = 5
-#BUZZER_PIN = 22
-#LED_PIN = 27
-#BUTTON_PIN = 23
+# Buzzer, LED and button default assignments (uncommented for use)
+BUZZER_PIN = 22
+LED_PIN = 27
+BUTTON_PIN = 23
 # Add more pins as needed
 
 # You can also use a dictionary for grouped pins

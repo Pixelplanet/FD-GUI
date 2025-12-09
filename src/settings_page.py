@@ -154,7 +154,7 @@ class SettingsPage(QWidget):
 
         # Preset buttons grid in a rounded card
         preset_card = QGroupBox('Presets')
-        preset_card.setStyleSheet('QGroupBox { border-radius: 16px; background: #353941; margin-top: 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.10); } QGroupBox:title { font-size: 20px; font-weight: bold; color: #ff9800; }')
+        preset_card.setStyleSheet('QGroupBox { border-radius: 16px; background: #353941; margin-top: 18px; } QGroupBox:title { font-size: 20px; font-weight: bold; color: #ff9800; }')
         preset_card_layout = QVBoxLayout()
         self.grid_layout = QGridLayout()
         self.preset_buttons = {}
@@ -183,7 +183,7 @@ class SettingsPage(QWidget):
         # Collapsible PID Controls Section
         from PyQt6.QtWidgets import QToolButton
         pid_group = QGroupBox('PID Heater Control')
-        pid_group.setStyleSheet('QGroupBox { border-radius: 16px; background: #353941; margin-top: 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.10); } QGroupBox:title { font-size: 20px; font-weight: bold; color: #ff9800; }')
+        pid_group.setStyleSheet('QGroupBox { border-radius: 16px; background: #353941; margin-top: 18px; } QGroupBox:title { font-size: 20px; font-weight: bold; color: #ff9800; }')
         pid_layout = QVBoxLayout()
         pid_desc = QLabel('Adjust PID values for PWM heater control to minimize overshoot and hysteresis.')
         pid_desc.setWordWrap(True)
@@ -207,9 +207,16 @@ class SettingsPage(QWidget):
 
         pid_save_btn = QPushButton('Save PID Values')
         pid_save_btn.setFont(QFont('Segoe UI', 18, QFont.Weight.Bold))
-        pid_save_btn.setStyleSheet('background-color: #0078d7; color: #fff; border-radius: 12px; padding: 10px 24px; font-size: 18px; font-weight: 600; box-shadow: 0 2px 8px rgba(0,0,0,0.10);')
+        pid_save_btn.setStyleSheet('background-color: #0078d7; color: #fff; border-radius: 12px; padding: 10px 24px; font-size: 18px; font-weight: 600;')
         pid_save_btn.clicked.connect(self.save_pid_values)
         pid_layout.addWidget(pid_save_btn)
+
+        # Auto-tune button (runs a quick simulated identification and fills P/I/D)
+        auto_btn = QPushButton('Auto-Tune PID')
+        auto_btn.setFont(QFont('Segoe UI', 14))
+        auto_btn.setStyleSheet('background-color: #00a676; color: #fff; border-radius: 12px; padding: 8px 18px;')
+        auto_btn.clicked.connect(self.start_autotune)
+        pid_layout.addWidget(auto_btn)
 
         # Collapsible button
         collapse_btn = QToolButton()
@@ -234,6 +241,123 @@ class SettingsPage(QWidget):
             QMessageBox.information(self, 'PID Saved', f'PID values saved: P={p}, I={i}, D={d}')
         except ValueError:
             QMessageBox.warning(self, 'Input Error', 'PID values must be numbers.')
+
+    def start_autotune(self):
+        """Start an automatic PID tuning routine.
+
+        This performs a fast, simulated identification (reaction-curve style)
+        and computes P, I, D using a Ziegler-Nichols style heuristic. The
+        routine runs in a background thread so the UI stays responsive.
+        The computed values are written into the PID fields when done.
+        """
+        # Disable the button to prevent re-entry
+        sender = self.sender()
+        if sender:
+            sender.setEnabled(False)
+
+        # Simple progress dialog
+        dlg = QDialog(self)
+        dlg.setWindowTitle('Auto-Tune PID')
+        dlg.setModal(True)
+        v = QVBoxLayout()
+        label = QLabel('Running auto-tune (simulated). This will take a few seconds...')
+        v.addWidget(label)
+        stop_btn = QPushButton('Stop')
+        v.addWidget(stop_btn)
+        dlg.setLayout(v)
+
+        import threading
+        stop_flag = {'stop': False}
+
+        def stop():
+            stop_flag['stop'] = True
+        stop_btn.clicked.connect(stop)
+
+        def autotune_worker():
+            # Use a simple first-order plus dead-time model simulation
+            # Ambient / initial temperature
+            T0 = 25.0
+            # Simulated process response parameters (conservative defaults)
+            L = 5.0    # dead time (s)
+            T = 60.0   # time constant (s)
+            K = 40.0   # process gain (°C per unit step)
+
+            # Simulate step response numerically to estimate t63 and L
+            dt = 1.0
+            t = 0.0
+            temps = []
+            times = []
+            T_final = T0 + K
+            while t < (L + 5 * T) and not stop_flag['stop']:
+                if t < L:
+                    temp = T0
+                else:
+                    temp = T0 + K * (1 - (2.718281828459045 ** (-(t - L) / T)))
+                temps.append(temp)
+                times.append(t)
+                t += dt
+                # Small sleep so this doesn't consume CPU; also makes dialog feel active
+                import time as _time
+                _time.sleep(0.02)
+
+            if stop_flag['stop']:
+                # Re-enable sender on UI thread
+                def reenable():
+                    if sender:
+                        sender.setEnabled(True)
+                    dlg.reject()
+                QTimer = __import__('PyQt6').QtCore.QTimer
+                QTimer.singleShot(0, reenable)
+                return
+
+            # Estimate t63 (time to reach 63.2% of the step)
+            delta = T_final - T0
+            target = T0 + 0.632 * delta
+            t63 = None
+            for ti, temp in zip(times, temps):
+                if temp >= target:
+                    t63 = ti
+                    break
+            if t63 is None:
+                t63 = L + T
+
+            # Estimate process parameters from simulation
+            est_L = L
+            est_T = max(1.0, t63 - est_L)
+            est_K = max(0.1, (T_final - T0))
+
+            # Ziegler-Nichols reaction curve (tuning for PID)
+            try:
+                Kp = 1.2 * est_T / (est_K * est_L)
+                Ti = 2.0 * est_L
+                Td = 0.5 * est_L
+                Ki = Kp / Ti if Ti != 0 else 0.0
+                Kd = Kp * Td
+            except Exception:
+                Kp, Ki, Kd = 2.0, 0.1, 0.01
+
+            # Clamp / sanitize values to reasonable ranges
+            Kp = max(0.0, min(Kp, 1000.0))
+            Ki = max(0.0, min(Ki, 1000.0))
+            Kd = max(0.0, min(Kd, 1000.0))
+
+            # Update UI on main thread
+            def finish():
+                # Fill the PID fields with computed values
+                self.pid_p_edit.setText(f"{Kp:.4f}")
+                self.pid_i_edit.setText(f"{Ki:.6f}")
+                self.pid_d_edit.setText(f"{Kd:.6f}")
+                QMessageBox.information(self, 'Auto-Tune Complete', f'Auto-tune finished.\nP={Kp:.4f}, I={Ki:.6f}, D={Kd:.6f}')
+                if sender:
+                    sender.setEnabled(True)
+                dlg.accept()
+
+            from PyQt6.QtCore import QTimer
+            QTimer.singleShot(0, finish)
+
+        thread = threading.Thread(target=autotune_worker, daemon=True)
+        thread.start()
+        dlg.exec()
     def refresh_presets_grid(self):
         # Clear grid
         for i in reversed(range(self.grid_layout.count())):

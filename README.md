@@ -13,20 +13,49 @@ A PyQt6-based GUI application for controlling a filament dryer system, designed 
 
 ## Requirements
 
-- Python 3.6+
-- PyQt6
+- Python 3.8+ (system Python on Raspberry Pi Bookworm is 3.11)
+- The GUI framework is provided by PyQt6 on desktop development environments. On Raspberry Pi, install the system PyQt package via apt (see notes below).
 
-## Installation
+## Installation (Desktop)
 
-1. Install the required dependencies:
+1. Create and activate a virtual environment (recommended):
+```bash
+python -m venv .venv
+source .venv/bin/activate
+```
+
+2. Install the Python packages (note: PyQt is not included in requirements for Raspberry Pi compatibility):
 ```bash
 pip install -r requirements.txt
 ```
 
-2. Run the application:
+3. Run the application:
 ```bash
-python src/filament_dryer_gui.py
+python -m src.filament_dryer_gui
 ```
+
+## Raspberry Pi (recommended approach)
+
+Building PyQt from pip on Raspberry Pi often fails because wheels are not available for all Python versions/architectures. Use the system package for PyQt instead:
+
+```bash
+# Update package lists
+sudo apt update
+
+# Install system PyQt5 (works with system Python)
+sudo apt install python3-pyqt5
+
+# Create a virtualenv (optional) and activate it
+python3 -m venv .venv
+source .venv/bin/activate
+
+# Install other Python deps from requirements.txt (PyQt removed from requirements)
+pip install -r requirements.txt
+```
+
+Notes:
+- If you need an isolated venv with a specific Python version, consider installing a compatible Python (3.9) or build from source — both are advanced options and not required for most users.
+- On Raspberry Pi OS, using `python3-pyqt5` from apt is the fastest, most reliable option.
 
 ## Usage
 

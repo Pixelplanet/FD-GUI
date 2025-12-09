@@ -1,10 +1,10 @@
 import sys
 import random
 import datetime
-from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, 
+from PyQt6.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, 
                              QPushButton, QSlider, QGridLayout, QGroupBox, QComboBox)
-from PyQt5.QtCore import Qt, pyqtSignal, QTimer
-from PyQt5.QtGui import QFont
+from PyQt6.QtCore import Qt, pyqtSignal, QTimer
+from PyQt6.QtGui import QFont
 import pyqtgraph as pg
 from src.pin_definitions import HEATER_PIN, FAN_PIN, TEMP_SENSOR_PIN, HUMIDITY_SENSOR_PIN, BUZZER_PIN, LED_PIN, BUTTON_PIN, PINS
 
@@ -15,7 +15,7 @@ class MainPage(QWidget):
     def update_presets(self, presets):
         self.presets = presets
         layout = self.layout()
-        # Remove old preset card
+    # remove old preset card (handled by layout search/remove above)
         for i in range(layout.count()):
             item = layout.itemAt(i)
             widget = item.widget() if item is not None else None
@@ -89,7 +89,7 @@ class MainPage(QWidget):
 
         # Preset quick-select (buttons) in a rounded card
         preset_card = QGroupBox('Presets')
-        preset_card.setStyleSheet('QGroupBox { border-radius: 16px; background: #353941; margin-top: 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.10); } QGroupBox:title { font-size: 20px; font-weight: bold; color: #ff9800; }')
+        preset_card.setStyleSheet('QGroupBox { border-radius: 16px; background: #353941; margin-top: 18px; } QGroupBox:title { font-size: 20px; font-weight: bold; color: #ff9800; }')
         preset_layout = QHBoxLayout()
         preset_label = QLabel('Preset:')
         preset_label.setFont(QFont('Segoe UI', 18, QFont.Weight.Bold))
@@ -144,7 +144,7 @@ class MainPage(QWidget):
 
         # Control buttons in a rounded card
         control_card = QGroupBox('Controls')
-        control_card.setStyleSheet('QGroupBox { border-radius: 16px; background: #353941; margin-top: 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.10); } QGroupBox:title { font-size: 20px; font-weight: bold; color: #ff9800; }')
+        control_card.setStyleSheet('QGroupBox { border-radius: 16px; background: #353941; margin-top: 18px; } QGroupBox:title { font-size: 20px; font-weight: bold; color: #ff9800; }')
         button_layout = QHBoxLayout()
         self.start_button = QPushButton('Start Dryer')
         self.start_button.setFont(QFont('Segoe UI', 18, QFont.Weight.Bold))
@@ -159,7 +159,7 @@ class MainPage(QWidget):
 
         # Live graph (PyQtGraph) in a rounded card
         graph_group = QGroupBox("Live Environment Graph")
-        graph_group.setStyleSheet('QGroupBox { border-radius: 16px; background: #353941; margin-top: 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.10); } QGroupBox:title { font-size: 20px; font-weight: bold; color: #ff9800; }')
+        graph_group.setStyleSheet('QGroupBox { border-radius: 16px; background: #353941; margin-top: 18px; } QGroupBox:title { font-size: 20px; font-weight: bold; color: #ff9800; }')
         graph_layout = QVBoxLayout()
         self.graph_widget = pg.PlotWidget()
         self.graph_widget.setBackground('w')
@@ -232,7 +232,7 @@ class MainPage(QWidget):
 if __name__ == "__main__":
     print("Main entry point reached")
     import sys
-    from PyQt5.QtWidgets import QApplication
+    from PyQt6.QtWidgets import QApplication
     app = QApplication(sys.argv)
     window = MainPage()
     window.show()

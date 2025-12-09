@@ -1,49 +1,15 @@
 import sys
 import json
-from PyQt5.QtWidgets import (QApplication, QMainWindow, QTabWidget, QWidget, QVBoxLayout, QLabel, QStatusBar, QMessageBox, QHBoxLayout)
-from PyQt5.QtCore import Qt, QTimer
-from PyQt5.QtGui import QFont
-from PyQt5.QtCore import Qt
+from PyQt6.QtWidgets import (QApplication, QMainWindow, QTabWidget, QWidget, QVBoxLayout, QLabel, QStatusBar, QMessageBox, QHBoxLayout)
+from PyQt6.QtCore import Qt, QTimer
+from PyQt6.QtGui import QFont
+from PyQt6.QtCore import Qt
 from src.main_page import MainPage
 from src.settings_page import SettingsPage
 from src.debugging_page import DebuggingPage
 
 class FilamentDryerGUI(QMainWindow):
-    def __init__(self):
-        super().__init__()
-        self.setWindowTitle('Filament Dryer Control System')
-        self.setWindowState(self.windowState() | Qt.WindowState.WindowFullScreen)
-
-        # Create tab widget for navigation
-        self.tabs = QTabWidget()
-        self.tabs.setFont(QFont('Segoe UI', 18, QFont.Weight.Bold))
-        self.tabs.setStyleSheet('''
-            QTabBar::tab {
-                height: 60px;
-                font-size: 20pt;
-                min-width: 180px;
-                max-width: 180px;
-                border-radius: 16px;
-                background: #353941;
-                color: #f0f0f0;
-            }
-            QTabBar::tab:selected {
-                background: #0078d7;
-                color: #fff;
-                border: 2px solid #ff9800;
-            }
-            QTabBar { min-height: 60px; }
-        ''')
-
-        # Create pages before adding tabs or connecting signals
-        self.main_page = MainPage()
-        self.settings_page = SettingsPage()
-        self.debugging_page = DebuggingPage(main_page=self.main_page, settings_page=self.settings_page)
-
-        # Add tabs
-        self.tabs.addTab(self.main_page, "Main")
-        self.tabs.addTab(self.settings_page, "Settings")
-        self.tabs.addTab(self.debugging_page, "Debug")
+    
     def __init__(self):
         super().__init__()
         self.setWindowTitle('Filament Dryer Control System')
@@ -137,7 +103,7 @@ class FilamentDryerGUI(QMainWindow):
         countdown = self.main_page.countdown_label.text() if hasattr(self.main_page, 'countdown_label') else '--:--'
         humidity = self.main_page.humidity_label.text() if hasattr(self.main_page, 'humidity_label') else '--'
         now = datetime.now().strftime('%H:%M:%S')
-        # Remove duplicated 'Time Remaining:' label, only show value
+        # status label shows condensed status: temp, humidity, preset and countdown
         self.status_label.setText(f"{temp} | {humidity} | {preset_info} | {countdown}")
         self.time_label.setText(now)
 
@@ -160,13 +126,13 @@ def main():
     # Modern dark theme using Qt stylesheets
     dark_stylesheet = """
     QWidget { background-color: #232629; color: #f0f0f0; font-family: 'Segoe UI', Arial, sans-serif; }
-    QTabBar::tab { background: #353941; color: #f0f0f0; border-radius: 16px; margin: 4px; padding: 8px 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+    QTabBar::tab { background: #353941; color: #f0f0f0; border-radius: 16px; margin: 4px; padding: 8px 24px; }
     QTabBar::tab:selected { background: #0078d7; color: #fff; border: 2px solid #ff9800; }
     QStatusBar { background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #232629, stop:1 #353941); color: #ff9800; font-weight: bold; font-size: 20px; border-bottom: 2px solid #0078d7; min-height: 48px; }
-    QGroupBox { border: 2px solid #0078d7; border-radius: 16px; margin-top: 18px; background: #353941; color: #f0f0f0; box-shadow: 0 2px 8px rgba(0,0,0,0.10); }
+    QGroupBox { border: 2px solid #0078d7; border-radius: 16px; margin-top: 18px; background: #353941; color: #f0f0f0; }
     QGroupBox:title { subcontrol-origin: margin; left: 18px; padding: 0 6px 0 6px; font-size: 18px; font-weight: bold; }
-    QPushButton { background-color: #0078d7; color: #fff; border-radius: 12px; padding: 10px 24px; font-size: 18px; font-weight: 600; box-shadow: 0 2px 8px rgba(0,0,0,0.10); }
-    QPushButton:hover { background-color: #005fa3; box-shadow: 0 4px 16px rgba(0,120,215,0.15); }
+    QPushButton { background-color: #0078d7; color: #fff; border-radius: 12px; padding: 10px 24px; font-size: 18px; font-weight: 600; }
+    QPushButton:hover { background-color: #005fa3; }
     QPushButton:checked { background-color: #ff9800; color: #232629; border: 2px solid #0078d7; }
     QComboBox { background-color: #353941; color: #f0f0f0; border-radius: 12px; padding: 6px; font-size: 16px; }
     QSlider::groove:horizontal { height: 10px; background: #353941; border-radius: 5px; }

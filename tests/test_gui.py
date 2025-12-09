@@ -1,16 +1,9 @@
-# tests/test_gui.py
 import os
 import sys
 import pytest
 from PyQt6.QtWidgets import QApplication, QMainWindow
 from PyQt6.QtCore import Qt
-from ..filament_dryer_gui import FilamentDryerGUI  # Use relative import
-
-@fixture
-def app():
-    return QApplication([])
-
-@yields
+from .filament_dryer_gui import MyApp
 def test_main_window(app):
-    gui = FilamentDryerGUI()
+    gui = MyApp()
     assert gui.isWidgetType(), "Failed to create main window"
